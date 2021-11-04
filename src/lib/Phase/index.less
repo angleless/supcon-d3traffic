@@ -1,0 +1,41 @@
+.phaseGroup{
+  font-size: 12px;
+  .phase{
+    display: flex;
+    .phaseName{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: silver;
+      color: white;
+      width: 14px;
+      word-break: break-all;
+      text-align: center;
+      height: 102px;
+      margin-top: 3px;
+      overflow: scroll;
+    }
+    .phaseNameFirst{
+      height: 80px;
+      margin-top: 25px;
+    }
+    .turns{
+      overflow-x: scroll;
+      overflow-y: hidden;
+      white-space: nowrap;
+      .turnItem{
+        display: inline-block;
+        margin: 3px 5px 0 0px;
+        border: none;
+        .turnName{
+          overflow: scroll;
+          height: 20px;
+          line-height: 20px;
+          background:silver;
+          text-align:center;
+          color: white;
+        }
+      }
+    }
+  }
+}

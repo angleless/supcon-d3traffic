@@ -1,0 +1,99 @@
+{
+  "name": "supcon-d3traffic",
+  "version": "1.0.16",
+  "description": "Traffic Components ",
+  "main": "dist/lib/index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server --inline --port 8088",
+    "lint": "standard",
+    "fix": "standard --fix",
+    "test": "ava --verbose",
+    "precommit": "npx standard && exit 0",
+    "storybook": "cross-env NODE_ENV=development start-storybook -p 9009",
+    "build-storybook": "build-storybook -o assets/storybook-static",
+    "standardfix": "standard --fix",
+    "watch": "chokidar \"src/**/*.js\" \"src/**/*.jsx\" -c \"npm run build\"",
+    "prepublishOnly": "npm run build",
+    "pub-public": "npm run prepublish && npm publish --registry=https://registry.npmjs.org"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "peerDependencies": {
+    "d3": "^5.9.7",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-modules-commonjs": "7.2.0",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
+    "@storybook/addon-actions": "^5.1.10",
+    "@storybook/addon-knobs": "^5.1.10",
+    "@storybook/addon-links": "^5.1.10",
+    "@storybook/addons": "^5.1.11",
+    "@storybook/react": "^5.1.1",
+    "@storybook/ui": "^5.1.11",
+    "@turf/turf": "^5.1.6",
+    "antd": "^3.26.7",
+    "ava": "^2.3.0",
+    "babel-eslint": "^10.0.2",
+    "babel-loader": "^8.0.6",
+    "chokidar-cli": "^2.1.0",
+    "colors": "^1.3.3",
+    "css-loader": "^3.2.0",
+    "cz-conventional-changelog": "^3.0.2",
+    "d3": "^5.9.7",
+    "esm": "^3.2.25",
+    "file-loader": "^5.0.2",
+    "html-webpack-plugin": "^3.2.0",
+    "less": "^3.9.0",
+    "less-loader": "^5.0.0",
+    "pre-commit": "^1.2.2",
+    "ramda": "^0.26.1",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0",
+    "standard": "^14.0.0",
+    "storybook-readme": "^5.0.8",
+    "style-loader": "^1.0.0",
+    "svg-pan-zoom": "^3.6.1",
+    "svg.js": "^2.6.5",
+    "svg.resize.js": "^1.4.3",
+    "svg.select.js": "^2.1.2",
+    "url-loader": "^3.0.0",
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6",
+    "webpack-dev-server": "^3.7.2"
+  },
+  "dependencies": {
+    "cross-env": "^5.2.0",
+    "dom-to-image": "^2.6.0",
+    "nerdamer": "^1.0.4",
+    "prop-types": "^15.7.2"
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "ignore": [
+      "*.config.js",
+      "*.test.js",
+      "src/lib/GreenWaveBandPro/**/*",
+      "assets/**/*",
+      "stories/**/*.js"
+    ]
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  },
+  "pre-commit": [
+    "precommit"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

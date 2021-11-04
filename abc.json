@@ -1,0 +1,13 @@
+{
+  "assets":{
+      "type":"command",
+      "command":{
+          "cmd":[
+            "npm install",
+            "npm install react@16 react-dom@16 --no-save",
+	          "npx build-storybook -o assets/storybook-static",
+            "cp -r ./assets/storybook-static/ $BUILD_DEST"
+          ]
+      }
+  }
+}
