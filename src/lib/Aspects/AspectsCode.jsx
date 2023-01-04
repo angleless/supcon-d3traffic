@@ -2347,7 +2347,7 @@ class TrafficFlow extends Component {
   connectingLine = []
 
   getCheckPhase = (list, { rid, toReverseRid, frids }) => {
-    const fridInfo = frids.find(item => (toReverseRid.includes(item.trid) && item.frid === rid))
+    const fridInfo = frids.find(item => toReverseRid.find(revRid => item.trid.includes(revRid)) && item.frid.includes(rid))
     const obj = list.find(item => (item.rid === rid && (toReverseRid.join(',') === item.toReverseRid.join(','))))
     return {
       isLegal: !!fridInfo, //  isLegal  合法
@@ -2360,12 +2360,12 @@ class TrafficFlow extends Component {
       const filterArr = (_item.frids && _item.frids.filter(_f => _f.turnDur === 3)) || []
       filterArr.forEach(fridObj => {
         const { frid, trid } = fridObj
-        const insObj = _item.ins.find(({ rid, directions }) => rid === frid && directions.includes('RIGHT'))
+        const insObj = _item.ins.find(({ rid, directions }) => frid.includes(rid) && directions.includes('RIGHT'))
         if (!insObj) { // 当渠化图数据出现
           console.error('NEW-PHASE', 'ADD-RIGHT', `Failed, 'laneDirNos' and 'turnDur' not match! frid:${frid}`)
           return
         }
-        const toFridObj = streetInfos.find(item => item.reverseRids && Object.keys(item.reverseRids).includes(trid))
+        const toFridObj = streetInfos.find(item => item.reverseRids && Object.keys(item.reverseRids).find(reverseRid => trid.includes(reverseRid)))
         const initState = { // 初始化的道路数据 和 coord
           streetInfos: streetInfos || '',
           coord: coord || ''
@@ -2433,7 +2433,7 @@ class TrafficFlow extends Component {
     const phaseDirInfoDTOList = []
     list && list.forEach(item => {
       const { frids, rid, toReverseRid } = item
-      const fridInfo = frids.find(item => (toReverseRid.includes(item.trid) && item.frid === rid)) || {}
+      const fridInfo = frids.find(item => (toReverseRid.find(revRid => item.trid.includes(revRid)) && item.frid.includes(rid))) || {}
       phaseDirInfoDTOList.push({
         dir8No: fridInfo.fdir8No,
         turnDirNo: fridInfo.turnDur,

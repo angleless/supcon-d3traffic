@@ -10,7 +10,7 @@ import {
   CROSS_SCALE_WALK_WIDTH
 } from './consts'
 import InnerAddDevice from './InnerAddDevice'
-import InnerAddDirections from './InnerAddDirections'
+import InnerAddDirections from './OldInnerAddDirections'
 import Plugin from './Plugin'
 import CenterLight from './CenterLight'
 import AddDevice from './AddDevice'
@@ -740,32 +740,39 @@ class Aspects extends Component {
   }
 
   handleSelectDirectionClick (e) {
+    // 方向的弹出框中的方向选中点击的事件
     const { editRoadParams, streetInfos } = this.state
     let callbackType = '' // 操作类型 'delete', 'add', 'modify' // 删除， 增加， 修改
-    let index = ''
-    const changeStreetInfo = JSON.parse(JSON.stringify(streetInfos))
+    let index = '' // 下标
+    const changeStreetInfo = JSON.parse(JSON.stringify(streetInfos)) // 深拷贝下数据格式
     const [infoIndex, insIndex, deviceIndex] = editRoadParams.split('_')
+    // infoIndex 道路下标，insIndex 进口道的下标，deviceIndex 设备的下标
+    //
     const callTab = changeStreetInfo[infoIndex].ins[insIndex].tabs
+    // 找到该道路下车道下的tabs值这个是以防合并车道时候下标变乱，用来记录哪个道路的下标 tabs 等同与infoIndex
     const insTab = changeStreetInfo[infoIndex].ins[insIndex].insTab
-    if (!deviceIndex) {
-      callbackType = 'add'
-      index = `${callTab}_${insTab}_${e}`
+    if (!deviceIndex) { // 设备下标不存在证明为增加设备
+      callbackType = 'add' // 具体的操作内容
+      index = `${callTab}_${insTab}_${e}` // 返回道路下标车道下标，由于设备没有为新增的
       changeStreetInfo[infoIndex].ins[insIndex].directions = [e]
-    } else if (e === 'DELETE') {
+    } else if (e === 'DELETE') { // 删除选中的方向
       callbackType = 'delete'
       index = `${callTab}_${insTab}_${e}`
       changeStreetInfo[infoIndex].ins[insIndex].directions = []
-    } else {
+    } else { // 修改方向的icon内容
       callbackType = 'modify'
       index = `${callTab}_${insTab}_${e}`
       changeStreetInfo[infoIndex].ins[insIndex].directions = [e]
     }
+    // 重新改变的重新赋值给streetInfos, 并且将展示弹窗的控制设为false关闭弹窗showAddDirectionsModal
     this.setState({
       streetInfos: changeStreetInfo,
       showAddDirectionsModal: false
     }, () => {
+      // 每次改变streetInfos需要再调用allFunc重新render
       this.allFunc()
     })
+    // 点击之后给组件外部暴露的事件
     this.originDataCallBack({ option: callbackType, content: 'directions', index }, changeStreetInfo, callTab, e.split('_'))
   }
 
