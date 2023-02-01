@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { pointLenth, segmentDividePoints, splitPoint, ang2rad, normalMovePoint, lineAnglePoint, intersectionPoint2 } from './geometry'
+import { pointLenth, segmentDividePoints, splitPoint, ang2rad, normalMovePoint, lineAnglePoint, intersectionPoint2, polar2rect } from './geometry'
 import { caclStreetInfos, streetBorderPath, SVGCoord, directions2Id, originDataInfos, reSizeWidthInfo } from './utils'
 // import Device from './Device'
 // 区划图的宽度，高度，人行横道的宽度和人行河道的宽度比例
@@ -211,6 +211,19 @@ class TrafficFlow extends Component {
           </pattern>
           {/* 所有的icon都放在symbol里面，包括转向的icon,设备的icon和自定义的icon 引用通过href进行引入 */}
           <g id='cb-aspects-symbols'>
+          <symbol width='24' height='24' id='STRAIGHT_FLOW' viewBox='0 0 1024 1024'>
+              <path d='M 478.38 412.002 H 430.654 L 513.55 0 L 593.346 412.002 h -52.09 V 1024 h -62.8755 Z' />
+            </symbol>
+            <symbol id='LEFT_FLOW' viewBox='0 0 1024 1024' width='24' height='24'>
+              <path d='M 450.608 0 L 373.234 290.022 l 77.3742 267.609 V 394.919 l 138.766 137.159 V 1024 H 650.766 V 376.727 L 450.608 172.118 Z' />
+            </symbol>
+
+            <symbol id='BACK_FLOW' width='24' height='24' viewBox='0 0 1024 1024'>
+              <path d='M 696.889 1024 V 125.819 C 660.414 41.9271 607.953 0 539.525 0 C 471.097 0 422.874 41.9366 394.875 125.819 v 212.158 H 327.111 l 99.5461 407.96 l 108.136 -407.96 h -69.5467 v -94.9096 c 4.95882 -62.0658 29.7244 -93.1081 74.2779 -93.1081 c 44.563 0 73.7185 31.0424 87.4667 93.1081 V 1024' />
+            </symbol>
+            <symbol id='RIGHT_FLOW' width='24' height='24' viewBox='0 0 1024 1024'>
+              <path d='M 571.277 0 L 645.981 290.022 l -74.7041 267.609 V 394.919 l -133.981 137.159 V 1024 H 378.019 V 376.727 l 193.258 -204.609 Z' />
+            </symbol>
             <symbol width='24' height='24' id='LEFT_STRAIGHT_RIGHT_BACK' viewBox='0 0 1024 1024'>
               <path d='M518.276741 0L597.333333 408.187259h-51.607703L545.716148 546.133333l136.154074-120.272592V293.925926L758.518519 497.701926 681.860741 675.081481V557.653333L545.716148 673.943704V1014.518519h-1.34637v0.142222H483.555556V1014.518519h-0.12326v-2.740149h-3.811555V708.41837c-13.539556-19.560296-32.95763-29.345185-58.263704-29.345185-34.721185 0-50.669037 22.584889-47.853037 67.745185l0.208593 2.910815v49.464889h57.144888L348.16 1011.787852 265.481481 799.184593h57.154371V701.696c4.721778-13.293037 10.477037-24.841481 17.256296-34.645333L265.481481 494.838519l76.657778-203.776v131.925333l141.293037 124.823704V408.187259H436.148148L518.276741 0zM342.139259 554.780444v109.160297C361.035852 638.501926 387.441778 625.777778 421.357037 625.777778c1.336889 0 2.673778 0.018963 3.982222 0.06637l-83.2-71.063704z' />
             </symbol>
@@ -777,7 +790,10 @@ class TrafficFlow extends Component {
               return `translate(${textPoint.x} ${textPoint.y}) rotate(${angle.from - 90})`
             })
         }
-        obj.frids && obj.frids.forEach(flowItem => {
+        const trueAngle = Math.atan2((insLineStart.x - insLineEnd.x), (insLineStart.y - insLineEnd.y)) * (180/Math.PI)
+        const transAngleStart = splitPoint(inflectionStart, inflectionEnd, 1)
+        const transStart = coord.math2svg(normalMovePoint(angle.from - 90, { x: transAngleStart.x, y: transAngleStart.y }, -35, false))
+        obj.frids && obj.frids.forEach((flowItem, flowIndex) => {
           // outs为出口道的数目ins为进口道的数组ins.length为进口道的数目，加起来是整个车道的数目
           // 出口道数目比上整个道路数目得到的比值 车道两边的两个点的连线inflectionStart, inflectionEnd splitPoint计算两个点直接的比例点，第三个参数为0.5为中点
           // 得到进口道和出口口道的连接点的比例为outs / (ins.length + outs) 从而得到相应的点 insStartPoint
@@ -798,7 +814,9 @@ class TrafficFlow extends Component {
             const curOut = obj.outsFlowInfo[flowItem.tangle].filter((f) => { return f.from === angle.from })[0]
             insLineStart = coord.math2svg(normalMovePoint(angle.from, { x: insLine.x, y: insLine.y }, flowItem.offset - obj.flowWidth / 2, false))
             const toLineStart = coord.math2svg(normalMovePoint(nextAngle.from, { x: toLine.x, y: toLine.y }, outFlowWidth / 2 - curOut.offset, false))
-
+            const turnNum = polar2rect(transStart, trueAngle - 90, 10 * (flowIndex + 1))
+            const tmpTurnSvg = polar2rect(turnNum, trueAngle - 90, -8)
+            const turnSvg = polar2rect(tmpTurnSvg, trueAngle, 25)
             // turnDirNo 1 左转， 2，直行，3，右转，4.掉头
             if (flowItem.turnDirNo === 4) {
               const insAngleStart = coord.math2svg(normalMovePoint(angle.from - 90, { x: insLine.x, y: insLine.y }, 80, false))
@@ -813,7 +831,14 @@ class TrafficFlow extends Component {
                 .attr('text-shadow', '5px 5px 3px rgb(213,213,213)')
                 .text(FlowDataNum)
                 .attr('transform', function (d, laneIndex) {
-                  return `translate(${connectPoint.x} ${connectPoint.y}) rotate(${angle.from + 180})`
+                  return `translate(${turnNum.x} ${turnNum.y}) rotate(${angle.from - 90})`
+                })
+              this.refDom.select('#svg-flow-num').append('use')
+                .attr('xlink:href', (v, i) => {
+                  return '#BACK_FLOW'
+                })
+                .attr('transform', function (d, laneIndex) {
+                  return `translate(${turnSvg.x} ${turnSvg.y}) rotate(${angle.from - 180})`
                 })
             } else if (flowItem.turnDirNo === 2) { // 直行
               curStartPoint = splitPoint(insLineStart1, toLineStart, 0.5)
@@ -825,7 +850,14 @@ class TrafficFlow extends Component {
                 .text(FlowDataNum)
                 .attr('text-shadow', '0.1em 0.1em #333')
                 .attr('transform', function (d, laneIndex) {
-                  return `translate(${centerPoint.x} ${centerPoint.y}) rotate(${nextAngle.from + 90})`
+                  return `translate(${turnNum.x} ${turnNum.y}) rotate(${angle.from - 90})`
+                })
+              this.refDom.select('#svg-flow-num').append('use')
+                .attr('xlink:href', (v, i) => {
+                  return '#STRAIGHT_FLOW'
+                })
+                .attr('transform', function (d, laneIndex) {
+                  return `translate(${turnSvg.x} ${turnSvg.y}) rotate(${angle.from - 180})`
                 })
             } else if (flowItem.turnDirNo === 1 || flowItem.turnDirNo === 3) {
               const { a: a1, b: b1, c: c1 } = lineAnglePoint(angle.from, { x: insLine.x, y: insLine.y })
@@ -846,7 +878,14 @@ class TrafficFlow extends Component {
                   .attr('font-size', 10)
                   .text(FlowDataNum)
                   .attr('transform', function (d, laneIndex) {
-                    return `translate(${x} ${y}) rotate(${nextAngle.from + 110})`
+                    return `translate(${turnNum.x} ${turnNum.y}) rotate(${angle.from - 90})`
+                  })
+                this.refDom.select('#svg-flow-num').append('use')
+                  .attr('xlink:href', (v, i) => {
+                    return '#LEFT_FLOW'
+                  })
+                  .attr('transform', function (d, laneIndex) {
+                    return `translate(${turnSvg.x} ${turnSvg.y}) rotate(${angle.from - 180})`
                   })
               } else if (flowItem.turnDirNo === 3) {
                 const { pathDom, pathLength } = this.getPathInfo(`${insLineStart.x} ${insLineStart.y} Q ${curStartPoint.x} ${curStartPoint.y} ${toLineStart.x} ${toLineStart.y}`)
@@ -856,7 +895,14 @@ class TrafficFlow extends Component {
                   .attr('font-size', 10)
                   .text(FlowDataNum)
                   .attr('transform', function (d, laneIndex) {
-                    return `translate(${x} ${y}) rotate(${nextAngle.from - 110})`
+                    return `translate(${turnNum.x} ${turnNum.y}) rotate(${angle.from - 90})`
+                  })
+                this.refDom.select('#svg-flow-num').append('use')
+                  .attr('xlink:href', (v, i) => {
+                    return '#RIGHT_FLOW'
+                  })
+                  .attr('transform', function (d, laneIndex) {
+                    return `translate(${turnSvg.x} ${turnSvg.y}) rotate(${angle.from - 180})`
                   })
               }
             }
